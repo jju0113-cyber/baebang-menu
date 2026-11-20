@@ -56,7 +56,7 @@
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                     <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-white border border-gray-100 shadow-sm relative">
                         <img 
-                            src="배방상점가 로고_2.png" 
+                            src="배방상점가%20로고_2.png" 
                             alt="BF TOWN Logo" 
                             class="w-full h-full object-contain p-1 z-10"
                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
@@ -290,16 +290,17 @@
 
             // 룸
             btnRoom.className = `filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${reqRoom ? 'bg-purple-50 border-purple-300 text-purple-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`;
-            btnRoom.querySelector('i').className = `w-4 h-4 mr-1.5 ${reqRoom ? 'text-purple-600' : 'text-gray-400'}`;
+            btnRoom.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 mr-1.5 ${reqRoom ? 'text-purple-600' : 'text-gray-400'}"></i> 룸 완비`;
             
             // 포장
             btnTakeout.className = `filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${reqTakeout ? 'bg-green-50 border-green-300 text-green-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`;
-            btnTakeout.querySelector('i').className = `w-4 h-4 mr-1.5 ${reqTakeout ? 'text-green-600' : 'text-gray-400'}`;
+            btnTakeout.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 mr-1.5 ${reqTakeout ? 'text-green-600' : 'text-gray-400'}"></i> 포장 가능`;
             
             // 예약
             btnReserve.className = `filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${reqReserve ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`;
-            btnReserve.querySelector('i').className = `w-4 h-4 mr-1.5 ${reqReserve ? 'text-blue-600' : 'text-gray-400'}`;
+            btnReserve.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 mr-1.5 ${reqReserve ? 'text-blue-600' : 'text-gray-400'}"></i> 예약 가능`;
             
+            lucide.createIcons(); // 아이콘 다시 생성
             renderStores();
         }
 
