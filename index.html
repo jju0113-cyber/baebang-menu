@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BF TOWN - 배방상점가 통합 메뉴판</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts (Pretendard / Noto Sans KR 대체용) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* 한글 폰트가 필요한 경우 시스템 폰트 혼용 */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, Roboto, "Noto Sans KR", "Segoe UI", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+        }
+        /* 스크롤바 숨기기 */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* 모달 애니메이션 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        .animate-zoom-in {
+            animation: zoomIn 0.2s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 pb-10 min-h-screen">
+
+    <!-- Header Area -->
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="max-w-6xl mx-auto px-4 py-4 sm:py-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <div class="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center bg-white border border-gray-100 shadow-sm relative">
+                        <img 
+                            src="배방상점가 로고_2.png" 
+                            alt="BF TOWN Logo" 
+                            class="w-full h-full object-contain p-1 z-10"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        >
+                        <div style="display: none;" class="absolute inset-0 bg-[#8B205D] text-white flex items-center justify-center font-bold text-lg z-0">
+                            BF
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-[#2C2A5C] tracking-tight leading-tight">BF TOWN</h1>
+                        <p class="text-sm font-medium text-[#8B205D]">배방상점가 상인회 메뉴판</p>
+                    </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="relative w-full sm:w-80">
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="매장명 또는 메뉴를 검색하세요" 
+                        class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#2C2A5C] focus:border-transparent transition-shadow text-sm shadow-sm"
+                    >
+                    <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+        
+        <!-- 상단 컨트롤 패널 -->
+        <div class="mb-8 space-y-4">
+            
+            <!-- Category Tabs -->
+            <div id="categoryContainer" class="flex overflow-x-auto hide-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 gap-2">
+                <!-- JavaScript로 카테고리 버튼 렌더링 -->
+            </div>
+
+            <!-- Condition Toggles -->
+            <div class="flex flex-wrap gap-2 pt-2 border-t border-gray-200" id="filterContainer">
+                <button id="btnRoom" class="filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border bg-white border-gray-200 text-gray-500 hover:bg-gray-50">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 mr-1.5 text-gray-400 icon-normal"></i>
+                    룸 완비
+                </button>
+                <button id="btnTakeout" class="filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border bg-white border-gray-200 text-gray-500 hover:bg-gray-50">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 mr-1.5 text-gray-400 icon-normal"></i>
+                    포장 가능
+                </button>
+                <button id="btnReserve" class="filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border bg-white border-gray-200 text-gray-500 hover:bg-gray-50">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 mr-1.5 text-gray-400 icon-normal"></i>
+                    예약 가능
+                </button>
+            </div>
+        </div>
+
+        <!-- 결과 카운트 -->
+        <div class="mb-4 text-sm text-gray-500 font-medium">
+            총 <span id="storeCount" class="text-[#8B205D] font-bold">0</span>개의 매장이 있습니다.
+        </div>
+
+        <!-- Store Grid -->
+        <div id="storeGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <!-- JavaScript로 매장 카드 렌더링 -->
+        </div>
+
+        <!-- 빈 결과 상태 -->
+        <div id="emptyState" class="hidden text-center py-20 bg-white rounded-2xl border border-gray-100">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4 text-gray-400">
+                <i data-lucide="search" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-700 mb-1">검색 결과가 없습니다</h3>
+            <p class="text-sm text-gray-500">다른 조건이나 검색어로 찾아보세요.</p>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2C2A5C]/40 backdrop-blur-sm transition-opacity animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden relative animate-zoom-in" onclick="event.stopPropagation()">
+            
+            <!-- 모달 헤더 -->
+            <div class="bg-[#2C2A5C] p-6 text-white relative">
+                <button id="closeModalBtn" class="absolute top-4 right-4 p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div id="modalCategory" class="inline-block px-2.5 py-1 bg-[#8B205D] rounded text-xs font-bold mb-3 shadow-sm">
+                    카테고리
+                </div>
+                <h2 id="modalName" class="text-3xl font-bold tracking-tight mb-1">매장명</h2>
+                <p id="modalCapacity" class="text-white/70 text-sm font-medium hidden">수용 가능 인원: -석</p>
+            </div>
+
+            <!-- 모달 내용 -->
+            <div class="p-6 space-y-6">
+                
+                <!-- 대표 메뉴 구역 -->
+                <div class="bg-fuchsia-50/50 border border-fuchsia-100 rounded-2xl p-4">
+                    <h4 class="text-xs font-bold text-[#8B205D] mb-1.5 flex items-center">
+                        <i data-lucide="utensils" class="w-3.5 h-3.5 mr-1"></i> 대표 메뉴
+                    </h4>
+                    <p id="modalMenu" class="text-base font-bold text-gray-900 leading-snug">메뉴내용</p>
+                </div>
+
+                <!-- 기본 정보 -->
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center mr-3 flex-shrink-0">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-gray-500"></i>
+                        </div>
+                        <div class="pt-1.5">
+                            <span id="modalAddress" class="text-sm font-medium text-gray-800">주소</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center mr-3 flex-shrink-0">
+                            <i data-lucide="phone" class="w-4 h-4 text-gray-500"></i>
+                        </div>
+                        <div>
+                            <span id="modalPhone" class="text-sm font-medium text-gray-800">전화번호</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center mr-3 flex-shrink-0">
+                            <i data-lucide="info" class="w-4 h-4 text-gray-500"></i>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-800">
+                                휴무일: <span id="modalClosed" class="">점포 문의</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100" />
+
+                <!-- 편의 시설 태그 -->
+                <div>
+                    <h4 class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">Services</h4>
+                    <div class="flex flex-wrap gap-2" id="modalServices">
+                        <!-- JS에서 채움 -->
+                    </div>
+                </div>
+
+                <!-- 액션 버튼 -->
+                <div class="grid grid-cols-3 gap-3 pt-2" id="modalActions">
+                    <!-- JS에서 채움 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 엑셀(PDF) 원본 데이터
+        const storeData = [
+            { id: 1, name: "송가네생태찌게", category: "한식", menu: "생태찌게", address: "충남 아산시 배방읍 북수로71 1층", phone: "0507-1414-7911", takeout: "O", room: "X", reserve: "O", capacity: "64", closed: "토요일" },
+            { id: 2, name: "마산아구찜", category: "한식", menu: "아구찜", address: "충남 아산시 배방읍 북수로52 1층", phone: "0504-0544-6482", takeout: "O", room: "O", reserve: "O", capacity: "60-70", closed: "수요일" },
+            { id: 3, name: "돈가마니", category: "한식", menu: "가정식백반, 능이버섯,홍어", address: "충남 아산시 배방읍 북수로56 1층", phone: "041-533-8308", takeout: "O", room: "O", reserve: "O", capacity: "60-70", closed: "" },
+            { id: 4, name: "정가네곱창", category: "한식", menu: "소곱창, 갈비살", address: "충남 아산시 배방읍 배방로187번길26 1층", phone: "041-534-7795", takeout: "O", room: "X", reserve: "X", capacity: "38-40", closed: "" },
+            { id: 5, name: "돼지우리", category: "한식", menu: "대페삼겹살", address: "충남 아산시 배방읍 배방로173번길 14-15 1층", phone: "041-548-9255", takeout: "O", room: "X", reserve: "X", capacity: "70", closed: "" },
+            { id: 6, name: "먹쇠통구이", category: "한식", menu: "돼지생갈비", address: "충남 아산시 배방읍 북수로87*4 1층", phone: "041-544-8852", takeout: "O", room: "X", reserve: "X", capacity: "40-50", closed: "" },
+            { id: 7, name: "성가네해장국", category: "한식", menu: "콩나물해장국, 선지해장국", address: "충남 아산시 배방읍 배방로191", phone: "041-532-6530", takeout: "O", room: "X", reserve: "O", capacity: "48-50", closed: "" },
+            { id: 8, name: "꿀꿀이한판구이", category: "한식", menu: "육류,고기요리", address: "충남 아산시 배방읍 북수로74 102호", phone: "0507-1434-9224", takeout: "X", room: "X", reserve: "O", capacity: "30", closed: "" },
+            { id: 9, name: "다래원", category: "중식", menu: "중식일체", address: "충남 아산시 배방읍 북수로58 1층", phone: "0507-780-3392", takeout: "O", room: "X", reserve: "O", capacity: "40-50", closed: "" },
+            { id: 10, name: "청룡각", category: "중식", menu: "중식일체", address: "충남 아산시 배방읍 배방로173번길8", phone: "041-548-1888", takeout: "O", room: "X", reserve: "O", capacity: "80", closed: "" },
+            { id: 11, name: "참치OK", category: "일식", menu: "생선회(포장예약만 가능)", address: "충남 아산시 배방읍 배방로187번길28 1층", phone: "041-545-3782", takeout: "O", room: "X", reserve: "O", capacity: "X", closed: "" },
+            { id: 12, name: "사계절회포차", category: "일식", menu: "생선회", address: "충남 아산시 배방읍 배방로173번길10-1", phone: "041-564-0546", takeout: "O", room: "X", reserve: "O", capacity: "30", closed: "" },
+            { id: 13, name: "신돈키호테", category: "양식", menu: "돈까스", address: "충남 아산시 배방읍 배방로173번길14-11 1층", phone: "041-547-7999", takeout: "O", room: "X", reserve: "O", capacity: "30-40", closed: "" },
+            { id: 14, name: "미담", category: "분식", menu: "종합분식", address: "충남 아산시 배방읍 배방로173번길7 1층", phone: "041-532-7555", takeout: "O", room: "X", reserve: "O", capacity: "40", closed: "" },
+            { id: 15, name: "원주통닭", category: "치킨", menu: "치킨", address: "충남 아산시 배방읍 북수서로16 101호", phone: "0507-1440-2386", takeout: "O", room: "X", reserve: "O", capacity: "40", closed: "" },
+            { id: 16, name: "열날개", category: "치킨", menu: "닭발", address: "충남 아산시 배방로 201번길30 1층", phone: "041-532-9229", takeout: "O", room: "X", reserve: "O", capacity: "X", closed: "" },
+            { id: 17, name: "지코바", category: "치킨", menu: "치킨", address: "충남 아산시 배방읍 북수로리 1056", phone: "041-532-1992", takeout: "O", room: "X", reserve: "O", capacity: "20-30", closed: "" },
+            { id: 18, name: "맥시카나치킨", category: "치킨", menu: "치킨", address: "충남 아산시 배방로 187번길 20-11 1층", phone: "041-544-4301", takeout: "O", room: "X", reserve: "O", capacity: "-", closed: "" },
+            { id: 19, name: "주점뱅이", category: "주점", menu: "각종전, 만두전골", address: "충남 아산시 배방읍 북수로52 202호", phone: "0507-1467-0646", takeout: "O", room: "X", reserve: "O", capacity: "70", closed: "" },
+            { id: 20, name: "배방DC마트", category: "마트", menu: "각종생활용품", address: "충남 아산시 배방읍 북수리925", phone: "041-541-8995", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" },
+            { id: 21, name: "롯데슈퍼", category: "마트", menu: "가정생활 슈퍼마켓", address: "충남 아산시 배방읍 북수로34", phone: "041-533-7771", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" },
+            { id: 22, name: "웰리스PT스튜디오", category: "헬스", menu: "헬스 PT", address: "충남 아산시 배방읍 북수리939 201호", phone: "0507-1411-2043", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" },
+            { id: 23, name: "빅", category: "의류 및 패션", menu: "여성의류 오버핏", address: "충남 아산시 배방읍 배방로173번길6-14 102호", phone: "0507-1485-0712", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" },
+            { id: 24, name: "Mr멋남", category: "미용", menu: "남성컷트", address: "충남 아산시 배방읍 배방로201번길13 102호", phone: "041-543-5991", takeout: "X", room: "X", reserve: "O", capacity: "-", closed: "" },
+            { id: 25, name: "마리헤어", category: "미용", menu: "헤어미용", address: "충남 아산시 배방읍 배방로199드림네스트 1층", phone: "041-531-7990", takeout: "X", room: "X", reserve: "O", capacity: "-", closed: "" },
+            { id: 26, name: "공원축산유통", category: "기타 소매", menu: "축산물도매", address: "충남 아산시 배방읍 배방로187번길20-8 1층", phone: "041-534-9292", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" },
+            { id: 27, name: "미트벨리", category: "기타 소매", menu: "축산물도매", address: "충남 아산시 배방읍 배방로239-1", phone: "0507-1372-8867", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" },
+            { id: 28, name: "제트콜", category: "배달서비스", menu: "퀵서비스 배달", address: "충남 아산시 배방읍 배방로187번길20-6", phone: "", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" },
+            { id: 29, name: "제이빌", category: "부동산", menu: "부동산", address: "충남 아산시 배방읍 북수로 173번길10-7", phone: "041-536-7224", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" },
+            { id: 30, name: "실로암빌", category: "부동산", menu: "부동산", address: "충남 아산시 배방읍 배방로173번길 10-10", phone: "", takeout: "X", room: "X", reserve: "X", capacity: "-", closed: "" }
+        ];
+
+        // 상태 변수
+        let activeCategory = "전체";
+        let searchQuery = "";
+        let reqRoom = false;
+        let reqTakeout = false;
+        let reqReserve = false;
+
+        // 카테고리 추출
+        const uniqueCategories = Array.from(new Set(storeData.map(store => store.category)));
+        const categories = ["전체", ...uniqueCategories];
+
+        // 아이콘 가져오기 헬퍼
+        function getCategoryIconName(category) {
+            if (category.includes("카페") || category.includes("디저트")) return "coffee";
+            if (category.includes("주점") || category.includes("호프")) return "beer";
+            if (category.includes("한식") || category.includes("중식") || category.includes("일식") || category.includes("양식") || category.includes("분식") || category.includes("치킨")) return "utensils";
+            return "store";
+        }
+
+        // 1. 카테고리 탭 렌더링
+        function renderCategories() {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="setActiveCategory('${cat}')"
+                    class="whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 ${
+                        activeCategory === cat 
+                        ? 'bg-[#2C2A5C] text-white shadow-md transform scale-105' 
+                        : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                    }">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function setActiveCategory(cat) {
+            activeCategory = cat;
+            renderCategories();
+            renderStores();
+        }
+
+        // 2. 필터 버튼 렌더링 (UI 업데이트)
+        function updateFilterButtons() {
+            const btnRoom = document.getElementById('btnRoom');
+            const btnTakeout = document.getElementById('btnTakeout');
+            const btnReserve = document.getElementById('btnReserve');
+
+            // 룸
+            btnRoom.className = `filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${reqRoom ? 'bg-purple-50 border-purple-300 text-purple-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`;
+            btnRoom.querySelector('i').className = `w-4 h-4 mr-1.5 ${reqRoom ? 'text-purple-600' : 'text-gray-400'}`;
+            
+            // 포장
+            btnTakeout.className = `filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${reqTakeout ? 'bg-green-50 border-green-300 text-green-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`;
+            btnTakeout.querySelector('i').className = `w-4 h-4 mr-1.5 ${reqTakeout ? 'text-green-600' : 'text-gray-400'}`;
+            
+            // 예약
+            btnReserve.className = `filter-btn flex items-center px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${reqReserve ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'}`;
+            btnReserve.querySelector('i').className = `w-4 h-4 mr-1.5 ${reqReserve ? 'text-blue-600' : 'text-gray-400'}`;
+            
+            renderStores();
+        }
+
+        // 이벤트 리스너: 필터 버튼
+        document.getElementById('btnRoom').addEventListener('click', () => { reqRoom = !reqRoom; updateFilterButtons(); });
+        document.getElementById('btnTakeout').addEventListener('click', () => { reqTakeout = !reqTakeout; updateFilterButtons(); });
+        document.getElementById('btnReserve').addEventListener('click', () => { reqReserve = !reqReserve; updateFilterButtons(); });
+
+        // 이벤트 리스너: 검색
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderStores();
+        });
+
+        // 3. 매장 그리드 렌더링
+        function renderStores() {
+            const filteredStores = storeData.filter(store => {
+                const matchCategory = activeCategory === "전체" || store.category === activeCategory;
+                const matchSearch = store.name.includes(searchQuery) || store.menu.includes(searchQuery);
+                const matchRoom = reqRoom ? store.room === 'O' : true;
+                const matchTakeout = reqTakeout ? store.takeout === 'O' : true;
+                const matchReserve = reqReserve ? store.reserve === 'O' : true;
+                
+                return matchCategory && matchSearch && matchRoom && matchTakeout && matchReserve;
+            });
+
+            document.getElementById('storeCount').innerText = filteredStores.length;
+
+            const grid = document.getElementById('storeGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filteredStores.length > 0) {
+                grid.style.display = 'grid';
+                emptyState.style.display = 'none';
+                grid.innerHTML = filteredStores.map(store => `
+                    <div onclick="openModal(${store.id})" class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 group flex flex-col h-full">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="inline-flex items-center text-xs font-bold text-[#8B205D] bg-fuchsia-50 px-2.5 py-1 rounded">
+                                <i data-lucide="${getCategoryIconName(store.category)}" class="w-4 h-4 mr-1"></i>
+                                ${store.category}
+                            </span>
+                            <div class="flex gap-1">
+                                ${store.room === 'O' ? `<span class="w-2 h-2 rounded-full bg-purple-500" title="룸 완비"></span>` : ''}
+                                ${store.takeout === 'O' ? `<span class="w-2 h-2 rounded-full bg-green-500" title="포장 가능"></span>` : ''}
+                            </div>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#2C2A5C] transition-colors">${store.name}</h3>
+                        <p class="text-sm text-gray-600 font-medium flex-grow">${store.menu}</p>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-50 flex items-center text-xs text-gray-400">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1"></i>
+                            <span class="truncate">${store.address.replace("충남 아산시 ", "")}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                grid.innerHTML = '';
+            }
+
+            lucide.createIcons(); // 렌더링 후 아이콘 재생성
+        }
+
+        // 4. 모달 제어
+        const modal = document.getElementById('detailModal');
+        
+        function openModal(id) {
+            const store = storeData.find(s => s.id === id);
+            if(!store) return;
+
+            document.getElementById('modalCategory').innerText = store.category;
+            document.getElementById('modalName').innerText = store.name;
+            
+            const capacityEl = document.getElementById('modalCapacity');
+            if(store.capacity && store.capacity !== "-" && store.capacity !== "X") {
+                capacityEl.innerText = `수용 가능 인원: ${store.capacity}석`;
+                capacityEl.style.display = 'block';
+            } else {
+                capacityEl.style.display = 'none';
+            }
+
+            document.getElementById('modalMenu').innerText = store.menu;
+            document.getElementById('modalAddress').innerText = store.address;
+            document.getElementById('modalPhone').innerText = store.phone || "전화번호 미기재";
+            
+            const closedEl = document.getElementById('modalClosed');
+            closedEl.innerText = store.closed || "점포 문의";
+            closedEl.className = store.closed ? "text-red-500 font-bold" : "";
+
+            // 서비스 태그
+            const servicesHtml = `
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold border ${store.takeout === 'O' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 border-gray-100 text-gray-400'}">
+                    ${store.takeout === 'O' ? '🛍️ 포장 가능' : '포장 불가'}
+                </span>
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold border ${store.reserve === 'O' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-gray-50 border-gray-100 text-gray-400'}">
+                    ${store.reserve === 'O' ? '📅 예약 가능' : '예약 불가'}
+                </span>
+                <span class="px-3 py-1.5 rounded-lg text-xs font-bold border ${store.room === 'O' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-gray-50 border-gray-100 text-gray-400'}">
+                    ${store.room === 'O' ? '🚪 룸 완비' : '룸 없음'}
+                </span>
+            `;
+            document.getElementById('modalServices').innerHTML = servicesHtml;
+
+            // 액션 버튼
+            const actionsHtml = `
+                <a 
+                    href="${store.phone ? `tel:${store.phone}` : '#'}" 
+                    ${!store.phone ? 'onclick="event.preventDefault()"' : ''}
+                    class="flex flex-col items-center justify-center py-3.5 rounded-xl transition-all shadow-sm ${store.phone ? 'bg-gray-900 hover:bg-black text-white' : 'bg-gray-100 opacity-50 cursor-not-allowed text-gray-400'}"
+                >
+                    <i data-lucide="phone" class="w-5 h-5 mb-1.5"></i>
+                    <span class="text-xs font-bold">전화걸기</span>
+                </a>
+                <a 
+                    href="https://map.naver.com/v5/search/${encodeURIComponent(store.address)}"
+                    target="_blank" rel="noopener noreferrer"
+                    class="flex flex-col items-center justify-center py-3.5 rounded-xl bg-[#03C75A] hover:bg-[#02b350] transition-colors text-white shadow-sm"
+                >
+                    <i data-lucide="navigation" class="w-5 h-5 mb-1.5"></i>
+                    <span class="text-xs font-bold">네이버 지도</span>
+                </a>
+                <a 
+                    href="https://map.kakao.com/link/search/${encodeURIComponent(store.address)}"
+                    target="_blank" rel="noopener noreferrer"
+                    class="flex flex-col items-center justify-center py-3.5 rounded-xl bg-[#FEE500] hover:bg-[#e5ce00] transition-colors text-[#3C1E1E] shadow-sm"
+                >
+                    <i data-lucide="map-pin" class="w-5 h-5 mb-1.5"></i>
+                    <span class="text-xs font-bold">카카오맵</span>
+                </a>
+            `;
+            document.getElementById('modalActions').innerHTML = actionsHtml;
+
+            lucide.createIcons();
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        // 모달 닫기 이벤트 리스너
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+        });
+
+        // 초기화
+        renderCategories();
+        renderStores();
+        lucide.createIcons();
+
+    </script>
+</body>
+</html>
